@@ -1,7 +1,8 @@
 <script lang="ts">
   import svelteLogo from "./assets/svelte.svg";
   import viteLogo from "/vite.svg";
-  import Counter from "./lib/Counter.svelte";
+  import Counter from "./lib/RedCounter.svelte";
+  import BlueCounter from "./lib/BlueCounter.svelte";
 </script>
 
 <main>
@@ -16,8 +17,16 @@
   <h1>Vite + Svelte</h1>
 
   <div class="card">
-    <Counter />
-    <my-counter></my-counter>
+    <section>
+      <h3>Normal Svelte imports</h3>
+      <Counter />
+      <BlueCounter />
+    </section>
+    <section>
+      <h3>Using components as custom elements</h3>
+      <red-counter></red-counter>
+      <blue-counter></blue-counter>
+    </section>
   </div>
 
   <p>
