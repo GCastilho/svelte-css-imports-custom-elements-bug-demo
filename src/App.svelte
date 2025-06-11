@@ -1,59 +1,42 @@
 <script lang="ts">
-  import svelteLogo from "./assets/svelte.svg";
-  import viteLogo from "/vite.svg";
   import Counter from "./lib/RedCounter.svelte";
   import BlueCounter from "./lib/BlueCounter.svelte";
+  import MagentaCounter from "./lib/MagentaCounter.svelte";
+  import "./lib/AquaCounter.svelte";
 </script>
 
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+  <h1>
+    Svelte bug importing foreign CSS into Custom Elements (Web Components)
+  </h1>
 
   <div class="card">
     <section>
-      <h3>Normal Svelte imports</h3>
+      <h3>
+        Using <code>import './red.css'</code> and manually inserting a
+        CSSStyleSheet on it's shadowRoot using <code>customElement.extend</code>
+      </h3>
       <Counter />
-      <BlueCounter />
-    </section>
-    <section>
-      <h3>Using components as custom elements</h3>
       <red-counter></red-counter>
+    </section>
+
+    <section>
+      <h3>Using <code>import "./blue.css";</code> only</h3>
+      <BlueCounter />
       <blue-counter></blue-counter>
+    </section>
+
+    <section>
+      <h3>Using <code>svelte:head</code> to add stylesheet</h3>
+      <MagentaCounter />
+      <magenta-counter></magenta-counter>
+    </section>
+
+    <section>
+      <h3>Manually inserting a link:css to component's shadowRoot</h3>
+      <aqua-counter></aqua-counter>
     </section>
   </div>
 
-  <p>
-    Check out <a
-      href="https://github.com/sveltejs/kit#readme"
-      target="_blank"
-      rel="noreferrer">SvelteKit</a
-    >, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">Click on the Vite and Svelte logos to learn more</p>
+  <span>See README.md for more details</span>
 </main>
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>

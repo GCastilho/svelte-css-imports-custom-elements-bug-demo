@@ -1,47 +1,66 @@
-# Svelte + TS + Vite
+# svelte-css-imports-custom-element-demo
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+This project demonstrates an issue with Svelte when importing custom CSS into components used as custom elements (Web Components).
 
-## Recommended IDE Setup
+## How to use it
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+1. Install dependencies:
+   ```sh
+   pnpm install
+   ```
+2. Run the app:
+   ```sh
+   pnpm dev
+   ```
+3. Open `http://localhost:5173` in your browser.
 
-## Need an official Svelte framework?
+You will see the Svelte Vite template with four counter components: Red, Blue, Magenta, and Aqua.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+Each counter imports or injects a custom CSS file (`red.css`, `blue.css`, `magenta.css`, `aqua.css`) and is instantiated in two ways: as a regular Svelte component and as a custom element (Web Component).
 
-## Technical considerations
+- **RedCounter**: Imports `red.css` and uses the `customElement.extend` option to manually create a `CSSStyleSheet` and insert it into the `shadowRoot` of the `<red-counter>` custom element.
+- **BlueCounter**: Imports `blue.css` only, relying on Svelte's default handling.
+- **MagentaCounter**: Uses `<svelte:head>` to add a global `<link rel="stylesheet" href="/magenta.css" />`, so the style is available globally.
+	- This also should have worked, but Svelte is adding the link to the document's head instead of the custom element's ShadowRoot. AquaCounter was created to demonstrate this
+- **AquaCounter**: Manually creates and appends a `<link rel="stylesheet" href="/aqua.css" />` element to the component's `shadowRoot` in the `customElement.extend` option.
 
-**Why use this over SvelteKit?**
+## What is the bug
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+![bug demo print](bug_demo.png)
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+Svelte does not handle external CSS imports correctly when compiling components as custom elements (Web Components). For example:
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+- Using
+  ```js
+  import './custom.css';
+  ```
+  works as expected in regular Svelte components, but when used in a custom element, the styles are not properly scoped or injected into the shadow root.
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+- Adding a stylesheet with
+  ```svelte
+  <svelte:head>
+    <link rel="stylesheet" href="/magenta.css" />
+  </svelte:head>
+  ```
+  causes Svelte to insert the `<link>` into the document's `<head>`, not into the custom element's shadow root. This means the styles are global and not encapsulated within the custom element, which causes them to not affect it at all (see [AquaCounter](src/lib/AquaCounter.svelte) for a manual workaround).
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+- Importing CSS via a `<style>` tag:
+  ```svelte
+  <style>
+    @import "./custom.css";
+  </style>
+  ```
+  partially works, but if the imported CSS contains selectors not used in the component's markup, Svelte emits a `'css-unused-selector'` warning. Additionally, the imported CSS is scoped only to the current component and is not available to child components, so it cannot act as a "global" style for the custom element.
 
-**Why include `.vscode/extensions.json`?**
+## Workarounds
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+The only reliable workaround is to use the `customElement.extend` option to manually inject styles into the shadow root. This can be done by either:
 
-**Why enable `allowJs` in the TS template?**
+- Creating a `CSSStyleSheet` and adding it to `shadowRoot.adoptedStyleSheets` (preferred, as it supports encapsulation and dynamic updates), or
+- Appending a `<link rel="stylesheet">` element directly to the shadow root (more limited, and does not easily support project-defined preprocessors like SCSS).
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+For reference, the [Stencil](https://stenciljs.com/) framework, which is focused on custom elements, [uses the CSSStyleSheet approach](https://github.com/stenciljs/core/blob/28e2a062f6c0e107c0a8d25c18304b5db79f0fb4/src/utils/shadow-root.ts#L21) to provide a "global" stylesheet to all components, making it easy to define shared styles for all custom elements.
 
-**Why is HMR not preserving my local component state?**
+---
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+Feel free to use this repository as a minimal reproduction for bug reports or further discussion.
