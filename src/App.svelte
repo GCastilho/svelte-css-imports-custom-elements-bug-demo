@@ -2,7 +2,7 @@
   import Counter from "./lib/RedCounter.svelte";
   import BlueCounter from "./lib/BlueCounter.svelte";
   import MagentaCounter from "./lib/MagentaCounter.svelte";
-  import "./lib/AquaCounter.svelte";
+  import AquaCounter from "./lib/AquaCounter.svelte";
 </script>
 
 <main>
@@ -34,6 +34,7 @@
 
     <section>
       <h3>Manually inserting a link:css to component's shadowRoot</h3>
+      <AquaCounter />
       <aqua-counter></aqua-counter>
     </section>
   </div>

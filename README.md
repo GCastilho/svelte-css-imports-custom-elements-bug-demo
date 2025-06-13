@@ -54,7 +54,7 @@ Svelte does not handle external CSS imports correctly when compiling components 
 
 ## Workarounds
 
-The only reliable workaround is to use the `customElement.extend` option to manually inject styles into the shadow root. This can be done by either:
+The only reliable workaround is to use the `customElement.extend` option to manually inject styles into the shadow root. This can be done in two ways:
 
 - Creating a `CSSStyleSheet` and adding it to `shadowRoot.adoptedStyleSheets` (preferred, as it supports encapsulation and dynamic updates), or
 - Appending a `<link rel="stylesheet">` element directly to the shadow root (more limited, and does not easily support project-defined preprocessors like SCSS).
